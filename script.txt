@@ -1,0 +1,7 @@
+help
+info
+show
+removebyid 3
+show
+executescript script.txt
+add
