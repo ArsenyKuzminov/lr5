@@ -188,9 +188,6 @@ public class CommandManager {
      * method for script execution
      */
     public static void seEnded(){
-        if (fileScanner!=null) {
-            fileScanner.close();
-        }
         seip=false;
     }
 
@@ -198,7 +195,7 @@ public class CommandManager {
      * method for script execution
      */
     public static String getFilescannerInput(){
-        if(fileScanner.hasNextLine()) return fileScanner.nextLine();
+        if (fileScanner.hasNextLine()) return fileScanner.nextLine();
         else return null;
     }
 
