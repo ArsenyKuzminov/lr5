@@ -15,29 +15,32 @@ public class Tools {
     private static String filename;
     private static boolean chlog=false;
     private static boolean dataFileSet=false;
+    private static Scanner sc = new Scanner(System.in);
 
     /**
      * save file setter
-     * prevents from changing after set
+     * returns
      *
      * @param saveFile
      * @throws IOException
      */
     public static void setSaveFile(String saveFile) throws IOException {
-        if (!sf) {
-            SaveFile=saveFile;
-            File file = new File(SaveFile);
-            if (!file.isFile()) {
-                file.createNewFile();
-                file.setWritable(true);
-                sf=true;
-            }
-            else if (!file.canWrite()) {
-                sf=true;
-                file.setWritable(true);
-            }
+        sf=false;
+        SaveFile=saveFile;
+        File file = new File(SaveFile);
+        if (!file.exists()||file.isDirectory()){
+            System.out.print("Your file doesn't exist or is a directory. Creating a new file with current name and write permissions...\n");
+            file.createNewFile();
+            file.setWritable(true);
+            sf=true;
+            return;
         }
-         else System.out.print("Change of file refused.\n");
+        if (!file.canWrite()){
+            System.out.print("Can't write into the file. Granting permissions to the file.\n");
+            file.setWritable(true);
+            sf=true;
+            return;
+        }
     }
 
     /**
@@ -55,36 +58,35 @@ public class Tools {
      */
     public static void setDataFile(String dataFile) {
         if (!df) {
-            Scanner lc = new Scanner(System.in);
             DataFile = dataFile;
             File file = new File(DataFile);
             if (file.isFile()) {
                 if (file.length()!=0) {
-                    file.setReadable(true);
+                    if (!file.canRead()){
+                        System.out.print("Can't read file. Set read permissions...\n");
+                        file.setReadable(true);
+                    }
                     dataFileSet=true;
-                    df=true;
                     return;
                 } else {
                     System.out.print("Your file is empty. Would you like to change it?\nIf yes, enter \"Y\"(exact as this one), in other case just enter anything (you'll start with empty collection).\n");
-                    String string = lc.nextLine();
+                    String string = input();
                     if (string!=null||string.equals("Y")) {
                         System.out.print("Enter the name of new file with data:\n");
-                        dataFile = lc.nextLine();
+                        dataFile = input();
                         setDataFile(dataFile);
                     } else {
-                        df=true;
                         return;
                     }
                 }
             } else {
                 System.out.print("Your file doesn't exist or is directory. Would you like to change it?\nIf yes, enter \"Y\"(exact as this one), in other case just enter anything (you'll start with empty collection).\n");
-                String string = lc.nextLine();
+                String string = input();
                 if (string!=null||string.equals("Y")) {
                     System.out.print("Enter the name of new file with data:\n");
-                    dataFile = lc.nextLine();
+                    dataFile = input();
                     setDataFile(dataFile);
                 } else {
-                    df=true;
                     return;
                 }
             }
@@ -138,6 +140,7 @@ public class Tools {
      * method to fill collection from file
      */
     public static void ReadCSV() throws IOException {
+        int invalid=0;
         FileReader fr = new FileReader(DataFile);
         Scanner sc = new Scanner(fr);
         String string;
@@ -183,20 +186,28 @@ public class Tools {
                 Ticket ticket = new Ticket(name, coordinates, price, comment, ttype, event);
                 TicketCollection.getTickets().add(ticket);
             } catch (NullValueException e){
+                invalid++;
             } catch (NumberFormatException e){
+                invalid++;
             }catch (TooSmallValueException e){
+                invalid++;
             }catch (TooBigValueException e){
+                invalid++;
             }catch (IllegalArgumentException e){
+                invalid++;
             } catch (EmptyStringException e) {
+                invalid++;
             } catch (TooLongStringException e){
+                invalid++;
+            }
         }
-        }
+        if (invalid!=0)System.out.print(invalid+" amount of values wasn't added to collection because of their invalidation.\n");
         fr.close();
         sc.close();
     }
 
     /**
-     * utility method for executing recursing scripts
+     * utility method for executing scripts
      *
      * @param scanner
      * @param ftp
@@ -205,5 +216,9 @@ public class Tools {
         for (int i = 0; i < ftp; i++) {
             scanner.nextLine();
         }
+    }
+
+    public static String input(){
+        return sc.nextLine();
     }
 }

@@ -18,8 +18,7 @@ public class ExecuteScript extends AbstractCommand{
     public void execute(CommandManager cm, String args[]) throws InappropriateArgsException, IOException{
         if (args.length>2||args.length==1) throw new InappropriateArgsException("Command ExecuteScript only accepts one string parameter.\n");
         else {
-            CommandManager commandManager = new CommandManager();
-            cm.executeExecuteScript(args[1], commandManager);
+            cm.executeExecuteScript(args[1]);
         }
     }
 }

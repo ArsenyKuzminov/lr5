@@ -1,3 +1,5 @@
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
@@ -239,64 +241,113 @@ public class Ticket implements Comparable<Ticket>{
      * @throws NumberFormatException
      */
     public static Ticket TicketCreation() throws NullValueException, TooBigValueException, TooSmallValueException, EmptyStringException, NumberFormatException{
-        System.out.print("All the parameter values invalidation will cancel creation straight away.\n");
-        String in;
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Input ticket name(can't be empty or null):\n");
-        String name = sc.nextLine();
-        if (name.equalsIgnoreCase("")) throw new NullValueException("Name can't be null.\n");
-        if (name.trim().equalsIgnoreCase("")) throw new EmptyStringException("Name can't be empty.\n");
-        System.out.print("Input x parameter of coordinates (Integer below or equal 484):\n");
-        in = sc.nextLine();
-        Integer x = Integer.valueOf(in);
-        if (x>484) throw new TooBigValueException("x can't be bigger than 484.\n");
-        System.out.print("Input y parameter of coordinates:\n");
-        in = sc.nextLine();
-        Integer y = Integer.valueOf(in);
-        System.out.print("Input price(positive integer):\n");
-        in = sc.nextLine();
-        Long price = Long.valueOf(in);
-        if (price<=0) throw new TooSmallValueException("Price can't be negative or zero.\n");
-        System.out.print("Input comment (amount of characters is below or equal 1009):\n");
-        String comment = sc.nextLine();
-        if (comment.length()>1009) throw new TooLongStringException("Comment's char length can't be bigger than 1009.\n");
-        System.out.print("Input ticket type(USUAL, VIP, BUDGETARY or CHEAP; in other case it will be null):\n");
-        in = sc.nextLine();
-        in.trim();
-        in.toUpperCase();
-        TicketType type;
-        try {
-            type = TicketType.valueOf(in);
+        if (!CommandManager.getSEIP()) {
+            System.out.print("All the parameter values invalidation will cancel creation straight away.\n");
+            String in;
+            System.out.print("Input ticket name(can't be empty or null):\n");
+            String name = Tools.input();
+            if (name.equalsIgnoreCase("")) throw new NullValueException("Name can't be null.\n");
+            if (name.trim().equalsIgnoreCase("")) throw new EmptyStringException("Name can't be empty.\n");
+            System.out.print("Input x parameter of coordinates (Integer below or equal 484):\n");
+            in = Tools.input();
+            Integer x = Integer.valueOf(in);
+            if (x > 484) throw new TooBigValueException("x can't be bigger than 484.\n");
+            System.out.print("Input y parameter of coordinates:\n");
+            in = Tools.input();
+            Integer y = Integer.valueOf(in);
+            System.out.print("Input price(positive integer):\n");
+            in = Tools.input();
+            Long price = Long.valueOf(in);
+            if (price <= 0) throw new TooSmallValueException("Price can't be negative or zero.\n");
+            System.out.print("Input comment (amount of characters is below or equal 1009):\n");
+            String comment = Tools.input();
+            if (comment.length() > 1009)
+                throw new TooLongStringException("Comment's char length can't be bigger than 1009.\n");
+            System.out.print("Input ticket type(USUAL, VIP, BUDGETARY or CHEAP; in other case it will be null):\n");
+            in = Tools.input();
+            in.trim();
+            in.toUpperCase();
+            TicketType type;
+            try {
+                type = TicketType.valueOf(in);
+            } catch (IllegalArgumentException e) {
+                System.out.print("Ticket Type cannot be identified as one. Value set as \"null\".\n");
+                type = null;
+            }
+            System.out.print("Input event's name (can't be empty):\n");
+            String eventName = Tools.input();
+            if (name.equalsIgnoreCase("")) throw new NullValueException("Event Name can't be null.\n");
+            if (name.trim().equalsIgnoreCase("")) throw new EmptyStringException("Event Name can't be empty.\n");
+            System.out.print("Input date of event(in format year-mm-dd):\n");
+            in = Tools.input();
+            java.time.LocalDate eventDate;
+            try {
+                eventDate = java.time.LocalDate.parse(in);
+            } catch (DateTimeParseException e) {
+                System.out.print("Date can't be parsed. Value set as \"null\".\n");
+                eventDate = null;
+            }
+            System.out.print("Input min age for event:\n");
+            in = Tools.input();
+            Long eventMinAge = Long.valueOf(in);
+            System.out.print("Input tickets count(positive integer):\n");
+            in = Tools.input();
+            Integer eventTicketsCount = Integer.valueOf(in);
+            if (eventTicketsCount <= 0) throw new TooSmallValueException("Tickets count must be bigger than 0.\n");
+            System.out.print("Input descryption of event(amount of characters is below or equal 1017):\n");
+            String eventDescryption = Tools.input();
+            if (eventDescryption.length() > 1017)
+                throw new TooLongStringException("Event's Descryption char length can't be bigger than 1017.\n");
+            Coordinates coordinates = new Coordinates(x, y);
+            Event event = new Event(eventName, eventDate, eventMinAge, eventTicketsCount, eventDescryption);
+            return new Ticket(name, coordinates, price, comment, type, event);
+        }else {
+            String in;
+            String name = CommandManager.getFilescannerInput();
+            if (name.equalsIgnoreCase("")) throw new NullValueException("Name can't be null.\n");
+            if (name.trim().equalsIgnoreCase("")) throw new EmptyStringException("Name can't be empty.\n");
+            in = CommandManager.getFilescannerInput();
+            Integer x = Integer.valueOf(in);
+            in = CommandManager.getFilescannerInput();
+            Integer y = Integer.valueOf(in);
+            in = CommandManager.getFilescannerInput();
+            Long price = Long.valueOf(in);
+            if (price <= 0) throw new TooSmallValueException("Price can't be negative or zero.\n");
+            String comment = CommandManager.getFilescannerInput();
+            if (comment.length() > 1009)
+                throw new TooLongStringException("Comment's char length can't be bigger than 1009.\n");
+            in = CommandManager.getFilescannerInput();
+            in.trim();
+            in.toUpperCase();
+            TicketType type;
+            try {
+                type = TicketType.valueOf(in);
+            } catch (IllegalArgumentException e) {
+                System.out.print("Ticket Type cannot be identified as one. Value set as \"null\".\n");
+                type = null;
+            }
+            String eventName = CommandManager.getFilescannerInput();
+            if (name.equalsIgnoreCase("")) throw new NullValueException("Event Name can't be null.\n");
+            if (name.trim().equalsIgnoreCase("")) throw new EmptyStringException("Event Name can't be empty.\n");
+            in = CommandManager.getFilescannerInput();
+            java.time.LocalDate eventDate;
+            try {
+                eventDate = java.time.LocalDate.parse(in);
+            } catch (DateTimeParseException e) {
+                System.out.print("Date can't be parsed. Value set as \"null\".\n");
+                eventDate = null;
+            }
+            in = CommandManager.getFilescannerInput();
+            Long eventMinAge = Long.valueOf(in);
+            in = CommandManager.getFilescannerInput();
+            Integer eventTicketsCount = Integer.valueOf(in);
+            if (eventTicketsCount <= 0) throw new TooSmallValueException("Tickets count must be bigger than 0.\n");
+            String eventDescryption = CommandManager.getFilescannerInput();
+            if (eventDescryption.length() > 1017)
+                throw new TooLongStringException("Event's Descryption char length can't be bigger than 1017.\n");
+            Coordinates coordinates = new Coordinates(x, y);
+            Event event = new Event(eventName, eventDate, eventMinAge, eventTicketsCount, eventDescryption);
+            return new Ticket(name, coordinates, price, comment, type, event);
         }
-        catch(IllegalArgumentException e){
-            System.out.print("Ticket Type cannot be identified as one. Value set as \"null\".\n");
-            type=null;
-        }
-        System.out.print("Input event's name (can't be empty):\n");
-        String eventName = sc.nextLine();
-        if (name.equalsIgnoreCase("")) throw new NullValueException("Event Name can't be null.\n");
-        if (name.trim().equalsIgnoreCase("")) throw new EmptyStringException("Event Name can't be empty.\n");
-        System.out.print("Input date of event(in format year-mm-dd):\n");
-        in = sc.nextLine();
-        java.time.LocalDate eventDate;
-        try {
-            eventDate = java.time.LocalDate.parse(in);
-        } catch (DateTimeParseException e) {
-            System.out.print("Date can't be parsed. Value set as \"null\".\n");
-            eventDate = null;
-        }
-        System.out.print("Input min age for event:\n");
-        in = sc.nextLine();
-        Long eventMinAge = Long.valueOf(in);
-        System.out.print("Input tickets count(positive integer):\n");
-        in = sc.nextLine();
-        Integer eventTicketsCount = Integer.valueOf(in);
-        if(eventTicketsCount<=0) throw new TooSmallValueException("Tickets count must be bigger than 0.\n");
-        System.out.print("Input descryption of event(amount of characters is below or equal 1017):\n");
-        String eventDescryption = sc.nextLine();
-        if (eventDescryption.length()>1017) throw new TooLongStringException("Event's Descryption char length can't be bigger than 1017.\n");
-        Coordinates coordinates = new Coordinates(x, y);
-        Event event = new Event(eventName, eventDate, eventMinAge, eventTicketsCount, eventDescryption);
-        return new Ticket(name, coordinates, price, comment, type, event);
     }
 }

@@ -1,3 +1,5 @@
+import java.awt.*;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -8,6 +10,8 @@ import java.util.*;
 public class CommandManager {
     private static ArrayList<AbstractCommand> commands = new ArrayList<>();
     private boolean find=false;
+    private static boolean seip=false; //Script Execution In Progress
+    private static Scanner fileScanner=null;
 
 
     /**
@@ -76,7 +80,7 @@ public class CommandManager {
         if (t==null) System.out.print("Ticket with inappropriate parameters created. It won't be added to collection.\n");
         else {
             TicketCollection.getTickets().add(t);
-            System.out.print("Ticket successfully added to collection.\n");
+            System.out.print("Ticket was successfully added to collection.\n");
         }
     }
 
@@ -94,10 +98,16 @@ public class CommandManager {
             TicketCollection.getTickets().remove(t);
             System.out.print("Please, update this element.\n");
             Ticket insert = Ticket.TicketCreation();
-            insert.changeID(id);
-            Ticket.balanceID();
-            TicketCollection.getTickets().add(insert);
-            break out;
+            if (insert!=null) {
+                insert.changeID(id);
+                Ticket.balanceID();
+                TicketCollection.getTickets().add(insert);
+                System.out.print("Updated tickets has successfully added to collection.\n");
+                break out;
+            } else {
+                System.out.print("Can't add updated ticket to a collection.\n");
+                return;
+            }
         }
     }
 
@@ -128,7 +138,10 @@ public class CommandManager {
         Long id=Long.valueOf(in);
         Ticket t=findByID(id);
         if(!find) throw new InappropriateArgsException("No Ticket with such ID.\n");
-        if (t!=null) TicketCollection.getTickets().remove(t);
+        if (t!=null) {
+            TicketCollection.getTickets().remove(t);
+            System.out.print("Element with id "+id+" has been removed from collection.\n");
+        }
     }
 
     /**
@@ -141,102 +154,52 @@ public class CommandManager {
     /**
      * Save execution
      */
-    public void executeSave() throws IOException {
+    public void executeSave(String filename) throws IOException {
+        Tools.setSaveFile(filename);
         Tools.Save();
+        System.out.print("Data has been saved in file.\n");
     }
 
     /**
      * ExecuteScript execution from selected file
-     * @param name
-     * @param commandManager
+     * @param filename
      * @throws IOException
      * @throws InappropriateArgsException
      */
-    public void executeExecuteScript(String name,CommandManager commandManager) throws IOException,InappropriateArgsException{
-        FileReader fr = new FileReader(name);
-        Scanner fileScanner = new Scanner(fr);
-        String commandtext;
-        AbstractCommand abstractCommand;
-        while(fileScanner.hasNextLine()){
-            commandtext = fileScanner.nextLine();
-            String []line=commandtext.split(" ");
-            Iterator<AbstractCommand> iter = commands.iterator();
-            while(iter.hasNext()){
-                if((abstractCommand=iter.next()).getName().equalsIgnoreCase(line[0])){
-                    if(abstractCommand!=null&&!abstractCommand.getName().equalsIgnoreCase("ExecuteScript")) {
-                        abstractCommand.execute(commandManager, line);
-                    }
-                }
-            }
+    public void executeExecuteScript(String filename) throws IOException,InappropriateArgsException{
+        seip=true;
+        File file = new File(filename);
+        if (file.isFile()&&file.exists()) {
+            FileReader fileReader = new FileReader(file);
+            fileScanner = new Scanner(fileReader);
         }
+        else throw new IOException("");
     }
 
-
-//    much more interestring realisation of script execution, which weren't tested enough
-//    maybe I'll add it later
-//    public void executeExecuteScript(String string,CommandManager commandManager) throws IOException,InappropriateArgsException{
-//        Stack<String> scripts = new Stack<>();
-//        Stack<Integer> strings = new Stack<>();
-//        scripts.push(string);
-//        Integer fso = 0; //first string offset
-//        strings.push(fso);
-//        String path = string;
-//        boolean ex;
-//        String commandtext="";
-//        prescript: while(!scripts.isEmpty()) {
-//            path=scripts.pop();
-//            fso=strings.pop();
-//            FileReader file = new FileReader(path);
-//            Scanner sc = new Scanner(file);
-//            Tools.skipLines(sc, fso);
-//            AbstractCommand command;
-//            while (sc.hasNext()) {
-//                fso++;
-//                commandtext = sc.nextLine();
-//                String[] commandLine = commandtext.split(" ");
-//                Iterator<AbstractCommand> iterator = CommandManager.commands.iterator();
-//                while (iterator.hasNext()) {
-//                if ((command = iterator.next()).getName().equalsIgnoreCase(commandLine[0])) {
-//                if (!command.getName().equalsIgnoreCase("executescript")) {
-//                     command.execute(commandManager, commandLine);
-//                        } else {
-//                            ex = true;
-//                            File example = new File(commandLine[1]);
-//                            Iterator<String> iter = scripts.iterator();
-//                            out:
-//                            while (iter.hasNext()) {
-//                                String fn = iter.next();
-//                                if (fn.equals(commandLine[1])) ex = false;
-//                            }
-//                            if (ex = true && example.isFile()) {
-//                                if (!example.canRead()) example.setReadable(true);
-//                                scripts.push(path);
-//                                scripts.push(commandLine[1]);
-//                                strings.push(fso);
-//                                strings.push(0);
-//                                sc.close();
-//                                file.close();
-//                                continue prescript;
-//                            } else System.out.print("File isn't valid and usable, proceeding to the next command.\n");
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+    /**
+     * method for script execution
+     * @return seip
+     */
+    public static boolean getSEIP(){
+        return seip;
+    }
 
     /**
-     * utility method for command search
-     * @param name
-     * @return AbstractCommand
+     * method for script execution
      */
-    public static AbstractCommand findCommand(String name) {
-        AbstractCommand A=null;
-        AbstractCommand B;
-        Iterator<AbstractCommand> iter= commands.iterator();
-        while (iter.hasNext())
-            if ((B=iter.next()).getName().equalsIgnoreCase(name)) A=B;
-        return A;
+    public static void seEnded(){
+        if (fileScanner!=null) {
+            fileScanner.close();
+        }
+        seip=false;
+    }
+
+    /**
+     * method for script execution
+     */
+    public static String getFilescannerInput(){
+        if(fileScanner.hasNextLine()) return fileScanner.nextLine();
+        else return null;
     }
 
     /**
@@ -288,10 +251,15 @@ public class CommandManager {
      * @param in
      */
     public void executeRemoveGreater(String in) {
+        int count=0;
         Integer i = Integer.valueOf(in);
         Iterator<Ticket> iter = TicketCollection.getTickets().iterator();
         Ticket t;
-        while (iter.hasNext()) if(iter.next().hashCode()>i) iter.remove();
+        while (iter.hasNext()) if(iter.next().hashCode()>i) {
+            iter.remove();
+            count++;
+        }
+        System.out.print(count+" elements have been removed from collection.");
     }
 
     /**

@@ -6,7 +6,7 @@ import java.io.IOException;
 public class Save extends AbstractCommand{
     public Save() {
         this.name="Save";
-        this.help="saves collection in the predesignated file(doesn't accept any parameter).";
+        this.help="saves collection in the predesignated file(accepts ONE string parameter as file name).";
     }
 
     /**
@@ -16,7 +16,7 @@ public class Save extends AbstractCommand{
      * @throws InappropriateArgsException
      */
     public void execute(CommandManager cm, String args[]) throws InappropriateArgsException, IOException{
-        if (args.length>1) throw new InappropriateArgsException("Command Save don't accept any parameters.\n");
-        else cm.executeSave();
+        if (args.length>2||args.length==1) throw new InappropriateArgsException("Command Save accepts only one string parameter.\n");
+        else cm.executeSave(args[1]);
     }
 }

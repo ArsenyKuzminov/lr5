@@ -11,30 +11,47 @@ public class Lab {
      */
     public static void main(String args []) throws IOException {
         try{
-            if((args.length<1)||(args.length>2)){
-                throw new InappropriateArgsException("This system only accept input of two file names.\n");
+            if(args.length>1||args.length==0){
+                throw new InappropriateArgsException("This system only accept input of one file name.\n");
             }
         }catch (InappropriateArgsException e){
             System.out.print(e.getMessage());
         }
-        Scanner sc=new Scanner(System.in);
-        Tools.setSaveFile(args[0]);
-        Tools.setDataFile(args[1]);
+        Tools.setDataFile(args[0]);
         CommandManager commandManager=new CommandManager();
         TicketCollection.doInitialization();
         if (Tools.getDataFileStatus()) Tools.ReadCSV();
         System.out.print("You may like to use \"help\" command to see the list of possible commands.\n");
+        String commandText=null;
+        String line[]=null;
         while(true) {
             boolean exist=false;//make sure command exists
             AbstractCommand abstractCommand;
-            Iterator<AbstractCommand> iterator = commandManager.getCommands().iterator();
-            try {
-                System.out.print("Input your command:\n");
-                String[] line = sc.nextLine().split(" ");
+            try{
+                if (!CommandManager.getSEIP()) System.out.print("Input your command:\n");
+
+                if (CommandManager.getSEIP()) {
+                    commandText = CommandManager.getFilescannerInput();
+                    if (commandText!=null)
+                        line = commandText.split(" ");
+                    else {
+                        CommandManager.seEnded();
+                        line=Tools.input().split(" ");
+                    }
+                }
+                else {
+                    line = Tools.input().split(" ");
+                }
+                Iterator<AbstractCommand> iterator = commandManager.getCommands().iterator();
                 while (iterator.hasNext()){
                     if((abstractCommand= iterator.next()).getName().equalsIgnoreCase(line[0])){
-                        abstractCommand.execute(commandManager, line);
-                        exist =true; //set true when command exists
+                        if (!(abstractCommand.getName().equalsIgnoreCase("ExecuteScript")&&CommandManager.getSEIP())) {
+                            abstractCommand.execute(commandManager, line);
+                            exist = true; //set true when command exists
+                        } else{
+                            exist = true;
+                            System.out.print("\"ExecuteScript\" command don't support internal \"ExecuteScript\"'s.\nThis feature might be realised later.\n");
+                        }
                     }
                 }
                 if(!exist){
@@ -66,10 +83,12 @@ public class Lab {
                 System.exit(2);
             } catch (ArrayIndexOutOfBoundsException e){
                 System.out.print("Event's value can't be parsed.\n");
-            } catch (ConcurrentModificationException e){
-                 System.out.print("ConcurrentModificationException has occured. Canceling script execution.\n");
             } catch (NullPointerException e){
                 System.out.print("Something went wrong. Canceling an operation...\n");
+            } catch (ConcurrentModificationException e){
+
+            } catch (SecurityException e){
+                System.out.print("Troubles with security system, so canceling command.\n");
             }
         }
     }
