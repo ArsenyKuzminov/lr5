@@ -1,0 +1,4 @@
+name,x,y,price,comment,type,eventname,eventdate,minage,ticketscount,descryption
+X95,-30,30,400,VIP ticket to birthday,VIP,egor's birthday,2015-08-03,12,25,egor's birthday! very cool!
+Y69,480,-9,30,usual ticket to local environmental event,USUAL,wwf event,2016-04-04,12,2000,wwf event thailand
+TRiQ122,350,-30000,20,ticket for concert,BUDGETARY,musical concert,2022-10-29,16,650, concert
