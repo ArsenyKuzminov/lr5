@@ -1,0 +1,4 @@
+id,name,x,y,creationDate,price,comment,type,eventID,eventName,eventDate,eventMinAge,eventTicketsCount,eventDescryption
+1,X95,-30,30,2022-05-11T21:40:58.276,400,VIP ticket to birthday,VIP,1,egor's birthday,2015.08.03,12,25,egor's birthday! very cool!
+2,Y69,480,-9,2022-05-11T21:40:58.277,30,usual ticket to local environmental event,USUAL,2,wwf event,2016.04.04,12,2000,wwf event thailand
+3,TRiQ122,350,-30000,2022-05-11T21:40:58.278,20,ticket for concert,BUDGETARY,3,musical concert,2022.10.29,16,650, concert

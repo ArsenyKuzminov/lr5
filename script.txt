@@ -1,0 +1,16 @@
+info
+executescript script.txt
+add
+name
+20
+30
+40
+nicecomment
+USUAL
+eventname
+2022-03-03
+16
+60
+nicedesc
+show
+executescript script.txt
